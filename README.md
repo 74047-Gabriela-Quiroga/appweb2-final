@@ -1,6 +1,6 @@
 # 🚀 Sistema de Gestión — Examen Final Aplicaciones Web 2
 
-Aplicación Web Full Stack para la gestión de **Usuarios**, **Productos** y **Ventas** con autenticación JWT.
+Aplicación Web Full Stack para la gestión de **Usuarios**, **Productos** y **Ventas** (con soporte para múltiples productos por venta) y autenticación mediante JWT.
 
 **Materia:** Aplicaciones Web 2 — IES Siglo 21
 
@@ -12,7 +12,7 @@ Aplicación Web Full Stack para la gestión de **Usuarios**, **Productos** y **V
 |------|-----------|
 | Backend | Node.js + Express.js |
 | Base de Datos | MongoDB Atlas + Mongoose |
-| Frontend | HTML5 + JavaScript vanilla (ES6+) + TailwindCSS (CDN) |
+| Frontend | HTML5 + JavaScript vanilla (ES6+ modular) + TailwindCSS (CDN) |
 | Autenticación | JWT (jsonwebtoken) + bcryptjs |
 
 ---
@@ -23,11 +23,11 @@ Aplicación Web Full Stack para la gestión de **Usuarios**, **Productos** y **V
 appweb2-final/
 ├── backend/              ← API REST (Node.js + Express)
 │   ├── db/
-│   │   ├── connection.js         ← Conexión a MongoDB Atlas
+│   │   ├── connection.js         ← Conexión con caché a MongoDB Atlas
 │   │   ├── schemas/              ← Modelos Mongoose
 │   │   │   ├── user.schema.js
 │   │   │   ├── product.schema.js
-│   │   │   └── sale.schema.js
+│   │   │   └── sale.schema.js    ← Soporte para array de productos por venta
 │   │   └── actions/              ← Lógica de negocio y CRUD
 │   │       ├── user.actions.js
 │   │       ├── product.actions.js
@@ -37,134 +37,51 @@ appweb2-final/
 │   │   ├── product.routes.js
 │   │   └── sale.routes.js
 │   ├── middlewares/
-│   │   ├── auth.middleware.js     ← Verificación JWT
+│   │   ├── auth.middleware.js     ← Verificación JWT (retorna HTTP 401)
 │   │   └── errorHandler.middleware.js ← Manejo centralizado de errores
-│   ├── .env                      ← Variables de entorno (NO subir a Git)
-│   ├── index.js                  ← Servidor Express principal
+│   ├── index.js                  ← Servidor Express principal (CORS habilitado)
 │   └── package.json
 │
 ├── frontend/             ← Interfaz de usuario (HTML + JS + Tailwind)
 │   ├── index.html                ← Página principal SPA
 │   ├── js/
+│   │   ├── config.js             ← Configuración centralizada de API_URL
 │   │   ├── services/             ← Peticiones fetch al backend
-│   │   │   ├── auth.js
-│   │   │   ├── products.js
-│   │   │   └── sales.js
+│   │   │   ├── auth.js           ← Login, registro y CRUD de usuarios
+│   │   │   ├── products.js       ← CRUD de productos
+│   │   │   └── sales.js          ← CRUD de ventas
 │   │   ├── components/           ← Funciones que generan HTML dinámico
 │   │   │   ├── userComponents.js
 │   │   │   ├── productComponents.js
-│   │   │   └── saleComponents.js
-│   │   └── index.js              ← Lógica principal y event listeners
-│   ├── _redirects                ← Configuración Netlify
-│   └── netlify.toml
+│   │   │   └── saleComponents.js ← Formulario dinámico con N productos
+│   │   └── index.js              ← SPA Router, manejo de sesión y eventos
 │
 └── README.md
+
 ```
 
 ---
 
-## ⚙️ Ejecución Local
+## 🌐 Despliegue en Producción
 
-### Requisitos Previos
+### Base de Datos (MongoDB Atlas)
+1. Crear cluster en MongoDB Atlas (Free Tier M0).
+2. Crear un usuario de base de datos y configurar IP Whitelist `0.0.0.0/0` (Network Access).
+3. Copiar la **URI de conexión** para agregarla en Render.
 
-- [Node.js](https://nodejs.org/) v18 o superior
-- Una cuenta en [MongoDB Atlas](https://www.mongodb.com/atlas) con un cluster creado
-- Un editor de código (VS Code recomendado)
+### Backend (Render)
+1. Crear un Web Service en [Render](https://render.com/).
+2. Directorio Raíz (`Root Directory`): `backend`
+3. Comando de Construcción (`Build Command`): `npm install`
+4. Comando de Inicio (`Start Command`): `npm start`
+5. Variables de entorno en Render:
+   - `MONGODB_URI`: La URI de Atlas
+   - `JWT_SECRET`: Tu clave secreta para JWT
 
-### 1. Clonar el repositorio
-
-```bash
-git clone <url-del-repo>
-cd appweb2-final
-```
-
-### 2. Configurar el Backend
-
-```bash
-# Entrar a la carpeta del backend
-cd backend
-
-# Instalar dependencias
-npm install
-
-# Configurar variables de entorno
-# Editar el archivo .env con tus datos:
-# - MONGODB_URI: URI de conexión de MongoDB Atlas
-# - JWT_SECRET: Una clave secreta para firmar los tokens
-# - FRONTEND_URL: http://localhost:5500 (o el puerto de tu servidor local)
-
-# Iniciar el servidor en modo desarrollo
-npm run dev
-```
-
-El servidor estará disponible en `http://localhost:3000`.
-
-### 3. Abrir el Frontend
-
-Abrir el archivo `frontend/index.html` con un servidor local. Opciones:
-
-**Opción A — Live Server (VS Code):**
-1. Instalar la extensión "Live Server" en VS Code.
-2. Hacer clic derecho en `index.html` → "Open with Live Server".
-
-**Opción B — Servidor HTTP con Node.js:**
-```bash
-# Desde la carpeta frontend/
-npx serve .
-```
-
-> ⚠️ **Importante:** El frontend DEBE abrirse desde un servidor HTTP (no como archivo `file://`) porque usa módulos ES6 (`type="module"`).
-
-### 4. Configurar la URL del Backend en el Frontend
-
-Para cambiar la URL del backend (por ejemplo al desplegar en Render), únicamente debes modificar la constante `API_URL` en un solo archivo:
-- [config.js](file:///C:/Users/Gale/.gemini/antigravity-ide/scratch/appweb2-final/frontend/js/config.js)
-
-```javascript
-// frontend/js/config.js
-export const API_URL = 'http://localhost:3000'; // Desarrollo local
-// export const API_URL = 'https://tu-backend.onrender.com'; // Producción en Render
-```
-
-Todos los servicios (`auth.js`, `products.js`, `sales.js`) importan automáticamente esta variable centralizada.
-
-
----
-
-## 🌐 Deploy (Producción)
-
-### MongoDB Atlas (Base de Datos)
-
-1. Crear cuenta en [MongoDB Atlas](https://www.mongodb.com/atlas).
-2. Crear un **Cluster** gratuito (Free Tier M0).
-3. En **Database Access**, crear un usuario con contraseña.
-4. En **Network Access**, agregar la IP `0.0.0.0/0` (permitir acceso desde cualquier lugar).
-5. En **Connect**, obtener la **URI de conexión** y reemplazar `<password>` con la contraseña del usuario.
-
-### Render (Backend)
-
-1. Subir el código a un repositorio de GitHub.
-2. Crear cuenta en [Render](https://render.com/).
-3. Crear un nuevo **Web Service**.
-4. Conectar el repositorio de GitHub.
-5. Configurar:
-   - **Root Directory:** `backend`
-   - **Build Command:** `npm install`
-   - **Start Command:** `node index.js`
-6. En **Environment Variables**, agregar:
-   - `MONGODB_URI` = URI de MongoDB Atlas
-   - `JWT_SECRET` = clave secreta para JWT
-   - `FRONTEND_URL` = URL del frontend en Netlify (ej: `https://mi-app.netlify.app`)
-
-### Netlify (Frontend)
-
-1. Crear cuenta en [Netlify](https://www.netlify.com/).
-2. Crear un nuevo sitio desde el repositorio de GitHub.
-3. Configurar:
-   - **Base directory:** `frontend`
-   - **Publish directory:** `frontend`
-   - **Build command:** (dejar vacío, es HTML estático)
-4. **Importante:** Antes de deployar, actualizar la constante `API_URL` en los archivos de servicios (`frontend/js/services/`) con la URL del backend en Render.
+### Frontend (Netlify)
+1. Crear un nuevo sitio desde Git en [Netlify](https://www.netlify.com/).
+2. Directorio base: `frontend`
+3. Antes de subir cambios, actualizar `frontend/js/config.js` con la URL HTTPS de tu backend en Render.
 
 ---
 
@@ -192,28 +109,33 @@ Todos los servicios (`auth.js`, `products.js`, `sales.js`) importan automáticam
 ### Ventas (`/sales`)
 | Método | Ruta | Descripción | Auth |
 |--------|------|-------------|------|
-| POST | `/sales/create` | Registrar venta | ✅ |
-| GET | `/sales` | Listar ventas | ✅ |
-| GET | `/sales/:id` | Ver venta por ID | ✅ |
+| POST | `/sales/create` | Registrar venta con array de productos | ✅ |
+| GET | `/sales` | Listar ventas (con `populate` de usuario y productos) | ✅ |
+| GET | `/sales/:id` | Ver venta por ID (con `populate`) | ✅ |
 | PUT | `/sales/:id` | Actualizar venta | ✅ |
 | DELETE | `/sales/:id` | Eliminar venta | ✅ |
 
 ---
 
-## 📜 Reglas de Negocio
+## 📜 Reglas de Negocio & Comportamientos Clave
 
-1. **No se puede eliminar un usuario** que tenga ventas registradas.
-2. **No se puede eliminar un producto** que tenga ventas asociadas.
-3. **No se puede registrar una venta** si el usuario o el producto no existen en la base de datos.
+1. **Ventas Múltiples**: Una venta puede incluir **uno o más productos**, especificando la cantidad individual de cada uno.
+2. **Restricciones de Eliminación**:
+   - **No se puede eliminar un usuario** que tenga ventas registradas.
+   - **No se puede eliminar un producto** que esté asociado a alguna venta existente.
+3. **Validación de Existencia**: No se puede registrar una venta si el usuario o alguno de los productos seleccionados no existen en la base de datos.
+4. **Gestión de Sesión & Expiración**:
+   - El token JWT y datos de usuario se almacenan en `sessionStorage` (se destruyen al cerrar la pestaña).
+   - Ante respuestas HTTP `401 Unauthorized` (token expirado o inválido), la app redirige automáticamente a la pantalla de login.
 
 ---
 
-## 🛠️ Tecnologías y Dependencias
+## 🛠️ Dependencias del Proyecto
 
-### Backend (package.json)
-- `express` — Framework web para Node.js
-- `mongoose` — ODM para MongoDB
-- `dotenv` — Carga variables de entorno desde `.env`
-- `cors` — Habilita peticiones cross-origin
+### Backend (`package.json`)
+- `express` — Framework HTTP
+- `mongoose` — ODM de MongoDB
+- `dotenv` — Variables de entorno
+- `cors` — Configuración CORS dinámica
 - `bcryptjs` — Encriptación de contraseñas
-- `jsonwebtoken` — Generación y verificación de tokens JWT
+- `jsonwebtoken` — Autenticación JWT

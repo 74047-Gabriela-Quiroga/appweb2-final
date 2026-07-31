@@ -25,8 +25,8 @@ export const renderProductsSection = (products) => {
         </button>
       </div>
 
-      <!-- Cards de estadísticas rápidas -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+      <!-- Card de estadística -->
+      <div class="grid grid-cols-1 sm:grid-cols-1 gap-4 mb-6 max-w-xs">
         <div class="glass-card rounded-xl p-4 flex items-center gap-3">
           <div class="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
             <span class="text-lg">📦</span>
@@ -34,24 +34,6 @@ export const renderProductsSection = (products) => {
           <div>
             <p class="text-2xl font-bold text-surface-900">${products.length}</p>
             <p class="text-xs text-surface-500">Total productos</p>
-          </div>
-        </div>
-        <div class="glass-card rounded-xl p-4 flex items-center gap-3">
-          <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-            <span class="text-lg">✅</span>
-          </div>
-          <div>
-            <p class="text-2xl font-bold text-surface-900">${products.filter(p => p.stock > 0).length}</p>
-            <p class="text-xs text-surface-500">Con stock</p>
-          </div>
-        </div>
-        <div class="glass-card rounded-xl p-4 flex items-center gap-3">
-          <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
-            <span class="text-lg">⚠️</span>
-          </div>
-          <div>
-            <p class="text-2xl font-bold text-surface-900">${products.filter(p => p.stock === 0).length}</p>
-            <p class="text-xs text-surface-500">Sin stock</p>
           </div>
         </div>
       </div>
@@ -65,13 +47,12 @@ export const renderProductsSection = (products) => {
                 <th class="text-left py-3.5 px-5 text-xs font-semibold text-surface-500 uppercase tracking-wider">Producto</th>
                 <th class="text-left py-3.5 px-5 text-xs font-semibold text-surface-500 uppercase tracking-wider">Categoría</th>
                 <th class="text-right py-3.5 px-5 text-xs font-semibold text-surface-500 uppercase tracking-wider">Precio</th>
-                <th class="text-right py-3.5 px-5 text-xs font-semibold text-surface-500 uppercase tracking-wider">Stock</th>
                 <th class="text-right py-3.5 px-5 text-xs font-semibold text-surface-500 uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-surface-100">
               ${products.length === 0
-                ? `<tr><td colspan="5" class="text-center py-12 text-surface-400">No hay productos registrados</td></tr>`
+                ? `<tr><td colspan="4" class="text-center py-12 text-surface-400">No hay productos registrados</td></tr>`
                 : products.map(product => renderProductRow(product)).join('')
               }
             </tbody>
@@ -88,11 +69,6 @@ export const renderProductsSection = (products) => {
  * @returns {String} HTML de la fila
  */
 const renderProductRow = (product) => {
-  // Determinamos el color del badge de stock
-  const stockColor = product.stock > 0
-    ? 'bg-green-100 text-green-700'
-    : 'bg-red-100 text-red-700';
-
   return `
     <tr class="table-row-hover">
       <td class="py-3.5 px-5">
@@ -106,9 +82,6 @@ const renderProductRow = (product) => {
       </td>
       <td class="py-3.5 px-5 text-right">
         <span class="font-semibold text-surface-800 text-sm">$${product.price.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
-      </td>
-      <td class="py-3.5 px-5 text-right">
-        <span class="text-xs font-semibold px-2.5 py-1 rounded-lg ${stockColor}">${product.stock}</span>
       </td>
       <td class="py-3.5 px-5">
         <div class="flex justify-end gap-2">
@@ -159,15 +132,10 @@ export const renderProductFormModal = (product = null) => {
               class="w-full px-4 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
           </div>
           <div>
-            <label for="form-product-stock" class="block text-sm font-medium text-surface-700 mb-1.5">Stock</label>
-            <input type="number" id="form-product-stock" required min="0" value="${isEdit ? product.stock : '0'}" placeholder="0"
+            <label for="form-product-category" class="block text-sm font-medium text-surface-700 mb-1.5">Categoría</label>
+            <input type="text" id="form-product-category" required value="${isEdit ? product.category : ''}" placeholder="Ej: Electrónica"
               class="w-full px-4 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
           </div>
-        </div>
-        <div>
-          <label for="form-product-category" class="block text-sm font-medium text-surface-700 mb-1.5">Categoría</label>
-          <input type="text" id="form-product-category" required value="${isEdit ? product.category : ''}" placeholder="Ej: Electrónica"
-            class="w-full px-4 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
         </div>
 
         <div id="form-product-error" class="hidden p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl"></div>

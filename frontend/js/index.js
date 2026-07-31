@@ -394,9 +394,9 @@ async function handleSaveProduct(event, id) {
       name: document.getElementById('form-product-name').value,
       desc: document.getElementById('form-product-desc').value,
       price: parseFloat(document.getElementById('form-product-price').value),
-      stock: parseInt(document.getElementById('form-product-stock').value),
       category: document.getElementById('form-product-category').value
     };
+
 
     if (id) {
       await updateProduct(id, productData);

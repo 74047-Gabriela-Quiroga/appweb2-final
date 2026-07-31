@@ -2,7 +2,7 @@
 // product.schema.js - Modelo de Producto (Mongoose)
 // ============================================================
 // Define la estructura de los documentos de productos en MongoDB.
-// Campos: name (único), desc, price, stock, category.
+// Campos: name (único), desc, price, category.
 // ============================================================
 
 const mongoose = require('mongoose');
@@ -23,11 +23,6 @@ const productSchema = new mongoose.Schema({
     type: Number,
     required: [true, 'El precio es obligatorio'],
     min: [0, 'El precio no puede ser negativo']
-  },
-  stock: {
-    type: Number,
-    default: 0, // Si no se envía stock, empieza en 0
-    min: [0, 'El stock no puede ser negativo']
   },
   category: {
     type: String,

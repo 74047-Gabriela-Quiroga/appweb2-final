@@ -14,7 +14,7 @@ const getToken = () => sessionStorage.getItem('token');
 
 /**
  * createProduct - Crea un nuevo producto
- * @param {Object} productData - { name, desc, price, stock, category }
+ * @param {Object} productData - { name, desc, price, category }
  * @returns {Object} Producto creado
  */
 export const createProduct = async (productData) => {

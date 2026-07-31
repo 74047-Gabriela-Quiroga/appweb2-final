@@ -117,10 +117,17 @@ npx serve .
 
 ### 4. Configurar la URL del Backend en el Frontend
 
-Si el backend corre en un puerto distinto a 3000, actualizar la constante `API_URL` en los archivos de servicios:
-- `frontend/js/services/auth.js`
-- `frontend/js/services/products.js`
-- `frontend/js/services/sales.js`
+Para cambiar la URL del backend (por ejemplo al desplegar en Render), únicamente debes modificar la constante `API_URL` en un solo archivo:
+- [config.js](file:///C:/Users/Gale/.gemini/antigravity-ide/scratch/appweb2-final/frontend/js/config.js)
+
+```javascript
+// frontend/js/config.js
+export const API_URL = 'http://localhost:3000'; // Desarrollo local
+// export const API_URL = 'https://tu-backend.onrender.com'; // Producción en Render
+```
+
+Todos los servicios (`auth.js`, `products.js`, `sales.js`) importan automáticamente esta variable centralizada.
+
 
 ---
 

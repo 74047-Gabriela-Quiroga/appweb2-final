@@ -5,8 +5,9 @@
 // para registro, login y CRUD de usuarios.
 // ============================================================
 
-// URL base del backend (cambiar en producción)
-const API_URL = 'http://localhost:3000';
+// Importamos la URL base centralizada
+import { API_URL } from '../config.js';
+
 
 /**
  * getToken - Obtiene el token JWT guardado en localStorage

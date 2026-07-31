@@ -5,7 +5,9 @@
 // de productos. Todas las rutas requieren autenticación.
 // ============================================================
 
-const API_URL = 'http://localhost:3000';
+// Importamos la URL base centralizada
+import { API_URL } from '../config.js';
+
 
 // Función helper para obtener el token
 const getToken = () => localStorage.getItem('token');

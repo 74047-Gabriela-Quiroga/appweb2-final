@@ -81,13 +81,14 @@ const deleteProduct = async (id) => {
   }
 
   // REGLA DE NEGOCIO: Verificamos si el producto tiene ventas asociadas
-  const salesCount = await Sale.countDocuments({ product: id });
+  const salesCount = await Sale.countDocuments({ 'products.product': id });
   if (salesCount > 0) {
     throw {
       status: 400,
       message: `No se puede eliminar el producto porque tiene ${salesCount} venta(s) asociada(s)`
     };
   }
+
 
   // Si no tiene ventas, procedemos a eliminar
   await Product.findByIdAndDelete(id);

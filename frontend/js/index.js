@@ -463,11 +463,47 @@ async function handleSaveSale(event, id) {
   const errorDiv = document.getElementById('form-sale-error');
 
   try {
+    const user = document.getElementById('form-sale-user').value;
+    const rows = document.querySelectorAll('.sale-product-row');
+
+    if (!user) {
+      throw new Error('Debe seleccionar un usuario/cliente');
+    }
+
+    if (!rows || rows.length === 0) {
+      throw new Error('Debe agregar al menos un producto');
+    }
+
+    const products = [];
+    let calculatedTotal = 0;
+
+    rows.forEach(row => {
+      const select = row.querySelector('.product-select');
+      const quantityInput = row.querySelector('.product-quantity');
+
+      const productId = select.value;
+      const selectedOption = select.options[select.selectedIndex];
+      const unitPrice = selectedOption ? parseFloat(selectedOption.getAttribute('data-price')) || 0 : 0;
+      const quantity = parseInt(quantityInput.value) || 1;
+
+      if (productId) {
+        products.push({
+          product: productId,
+          quantity: quantity,
+          unitPrice: unitPrice
+        });
+        calculatedTotal += unitPrice * quantity;
+      }
+    });
+
+    if (products.length === 0) {
+      throw new Error('Debe seleccionar al menos un producto válido');
+    }
+
     const saleData = {
-      user: document.getElementById('form-sale-user').value,
-      product: document.getElementById('form-sale-product').value,
-      quantity: parseInt(document.getElementById('form-sale-quantity').value),
-      totalPrice: parseFloat(document.getElementById('form-sale-total').value)
+      user,
+      products,
+      totalPrice: parseFloat(calculatedTotal.toFixed(2))
     };
 
     if (id) {
@@ -499,6 +535,92 @@ async function handleDeleteSale(id) {
     showToast(error.message, 'error');
   }
 }
+
+/**
+ * addProductRowToSaleModal - Agrega una nueva fila de producto al modal de venta
+ */
+function addProductRowToSaleModal() {
+  const container = document.getElementById('sale-products-container');
+  if (!container) return;
+
+  const products = window.availableProducts || [];
+  const index = container.children.length;
+
+  // Importamos y usamos renderProductRowInput si está disponible en scope
+  const tempDiv = document.createElement('div');
+  const productOptions = products.map(p => `
+    <option value="${p._id}" data-price="${p.price}">
+      ${p.name} ($${p.price})
+    </option>
+  `).join('');
+
+  tempDiv.innerHTML = `
+    <div class="sale-product-row flex items-center gap-2 bg-surface-50 p-2.5 rounded-xl border border-surface-200">
+      <select onchange="calculateSaleTotal()" required
+        class="product-select flex-1 px-3 py-2 bg-white border border-surface-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+        <option value="" data-price="0">Seleccionar producto...</option>
+        ${productOptions}
+      </select>
+
+      <div class="w-20">
+        <input type="number" min="1" value="1" oninput="calculateSaleTotal()" onchange="calculateSaleTotal()" required
+          class="product-quantity w-full px-2 py-2 bg-white border border-surface-200 rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Cant.">
+      </div>
+
+      <button type="button" onclick="removeProductRowFromSaleModal(this)" title="Quitar producto"
+        class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg text-xs font-bold transition-colors">
+        ✕
+      </button>
+    </div>
+  `;
+
+  container.appendChild(tempDiv.firstElementChild);
+  calculateSaleTotal();
+}
+
+/**
+ * removeProductRowFromSaleModal - Elimina una fila de producto del modal de venta
+ * @param {HTMLElement} btnElement - Botón ✕ presionado
+ */
+function removeProductRowFromSaleModal(btnElement) {
+  const container = document.getElementById('sale-products-container');
+  const rows = container.querySelectorAll('.sale-product-row');
+
+  // Permitir eliminar solo si hay más de 1 fila
+  if (rows.length > 1) {
+    btnElement.closest('.sale-product-row').remove();
+    calculateSaleTotal();
+  } else {
+    showToast('La venta debe contener al menos un producto', 'info');
+  }
+}
+
+/**
+ * calculateSaleTotal - Recorre todas las filas de productos y calcula el total acumulado
+ */
+function calculateSaleTotal() {
+  const rows = document.querySelectorAll('.sale-product-row');
+  let total = 0;
+
+  rows.forEach(row => {
+    const select = row.querySelector('.product-select');
+    const quantityInput = row.querySelector('.product-quantity');
+
+    if (select && quantityInput) {
+      const selectedOption = select.options[select.selectedIndex];
+      const price = selectedOption ? parseFloat(selectedOption.getAttribute('data-price')) || 0 : 0;
+      const quantity = parseInt(quantityInput.value) || 0;
+
+      total += price * quantity;
+    }
+  });
+
+  const totalInput = document.getElementById('form-sale-total');
+  if (totalInput) {
+    totalInput.value = total.toFixed(2);
+  }
+}
+
 
 
 /**
@@ -582,3 +704,7 @@ window.handleSaveSale = handleSaveSale;
 window.handleDeleteSale = handleDeleteSale;
 window.handleProductSelectChange = handleProductSelectChange;
 window.calculateTotal = calculateTotal;
+window.addProductRowToSaleModal = addProductRowToSaleModal;
+window.removeProductRowFromSaleModal = removeProductRowFromSaleModal;
+window.calculateSaleTotal = calculateSaleTotal;
+

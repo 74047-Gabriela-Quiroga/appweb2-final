@@ -1,10 +1,10 @@
 // ============================================================
-// sale.actions.js - Operaciones de base de datos para Ventas
+// sale.actions.js - Operaciones de base de datos para Ventas (Múltiples Productos)
 // ============================================================
 // Contiene las funciones CRUD para la entidad Sale.
-// REGLA DE NEGOCIO: Validar existencia de usuario y producto antes
-// de registrar una venta.
-// Usa .populate() para traer los datos completos de user y product.
+// REGLA DE NEGOCIO: Validar existencia de usuario y de cada producto
+// antes de registrar o modificar una venta.
+// Usa .populate() para traer los datos de user y de cada producto en products.
 // ============================================================
 
 const Sale = require('../schemas/sale.schema');
@@ -12,13 +12,13 @@ const User = require('../schemas/user.schema');
 const Product = require('../schemas/product.schema');
 
 /**
- * createSale - Registra una nueva venta
- * REGLA DE NEGOCIO: Valida que existan el usuario y el producto
- * @param {Object} saleData - Datos de la venta
+ * createSale - Registra una nueva venta con múltiples productos
+ * REGLA DE NEGOCIO: Valida que existan el usuario y todos los productos
+ * @param {Object} saleData - { user, products: [{ product, quantity, unitPrice }], totalPrice }
  * @returns {Object} Venta creada (con populate)
  */
 const createSale = async (saleData) => {
-  const { user, product, quantity, totalPrice } = saleData;
+  const { user, products, totalPrice } = saleData;
 
   // REGLA DE NEGOCIO: Verificamos que el usuario exista
   const existingUser = await User.findById(user);
@@ -26,38 +26,42 @@ const createSale = async (saleData) => {
     throw { status: 404, message: 'El usuario especificado no existe' };
   }
 
-  // REGLA DE NEGOCIO: Verificamos que el producto exista
-  const existingProduct = await Product.findById(product);
-  if (!existingProduct) {
-    throw { status: 404, message: 'El producto especificado no existe' };
+  // Verificamos que se haya enviado al menos un producto
+  if (!products || !Array.isArray(products) || products.length === 0) {
+    throw { status: 400, message: 'La venta debe contener al menos un producto' };
+  }
+
+  // REGLA DE NEGOCIO: Verificamos que todos los productos existan
+  for (const item of products) {
+    const existingProduct = await Product.findById(item.product);
+    if (!existingProduct) {
+      throw { status: 404, message: `El producto especificado (ID: ${item.product}) no existe` };
+    }
   }
 
   // Creamos la venta
   const newSale = await Sale.create({
     user,
-    product,
-    quantity,
+    products,
     totalPrice
   });
 
-  // Hacemos populate para devolver los datos completos del usuario y producto
-  // populate() reemplaza el ObjectId por el documento completo
+  // Hacemos populate del usuario y de cada producto dentro del array products
   const populatedSale = await Sale.findById(newSale._id)
-    .populate('user', 'username name')    // Solo traemos username y name
-    .populate('product', 'name price');   // Solo traemos name y price
+    .populate('user', 'username name')
+    .populate('products.product', 'name price category');
 
   return populatedSale;
 };
 
 /**
- * getAllSales - Obtiene todas las ventas con datos de usuario y producto
+ * getAllSales - Obtiene todas las ventas con datos poblados de usuario y productos
  * @returns {Array} Lista de ventas (con populate)
  */
 const getAllSales = async () => {
-  // populate() trae los datos relacionados en vez de solo el ID
   const sales = await Sale.find()
     .populate('user', 'username name')
-    .populate('product', 'name price');
+    .populate('products.product', 'name price category');
   return sales;
 };
 
@@ -69,7 +73,7 @@ const getAllSales = async () => {
 const getSaleById = async (id) => {
   const sale = await Sale.findById(id)
     .populate('user', 'username name')
-    .populate('product', 'name price');
+    .populate('products.product', 'name price category');
 
   if (!sale) {
     throw { status: 404, message: 'Venta no encontrada' };
@@ -81,11 +85,10 @@ const getSaleById = async (id) => {
 /**
  * updateSale - Actualiza los datos de una venta
  * @param {String} id - ID de la venta a actualizar
- * @param {Object} saleData - Nuevos datos de la venta
+ * @param {Object} saleData - Nuevos datos
  * @returns {Object} Venta actualizada (con populate)
  */
 const updateSale = async (id, saleData) => {
-  // Si se cambia el usuario, verificamos que exista
   if (saleData.user) {
     const existingUser = await User.findById(saleData.user);
     if (!existingUser) {
@@ -93,11 +96,15 @@ const updateSale = async (id, saleData) => {
     }
   }
 
-  // Si se cambia el producto, verificamos que exista
-  if (saleData.product) {
-    const existingProduct = await Product.findById(saleData.product);
-    if (!existingProduct) {
-      throw { status: 404, message: 'El producto especificado no existe' };
+  if (saleData.products && Array.isArray(saleData.products)) {
+    if (saleData.products.length === 0) {
+      throw { status: 400, message: 'La venta debe contener al menos un producto' };
+    }
+    for (const item of saleData.products) {
+      const existingProduct = await Product.findById(item.product);
+      if (!existingProduct) {
+        throw { status: 404, message: `El producto especificado (ID: ${item.product}) no existe` };
+      }
     }
   }
 
@@ -106,7 +113,7 @@ const updateSale = async (id, saleData) => {
     runValidators: true
   })
     .populate('user', 'username name')
-    .populate('product', 'name price');
+    .populate('products.product', 'name price category');
 
   if (!updatedSale) {
     throw { status: 404, message: 'Venta no encontrada' };

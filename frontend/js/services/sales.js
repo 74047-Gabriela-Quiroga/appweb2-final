@@ -9,7 +9,7 @@
 import { API_URL } from '../config.js';
 
 
-const getToken = () => localStorage.getItem('token');
+const getToken = () => sessionStorage.getItem('token');
 
 /**
  * createSale - Registra una nueva venta

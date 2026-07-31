@@ -10,10 +10,11 @@ import { API_URL } from '../config.js';
 
 
 /**
- * getToken - Obtiene el token JWT guardado en localStorage
+ * getToken - Obtiene el token JWT guardado en sessionStorage
  * @returns {String|null} Token JWT o null si no existe
  */
-const getToken = () => localStorage.getItem('token');
+const getToken = () => sessionStorage.getItem('token');
+
 
 /**
  * registerUser - Registra un nuevo usuario
@@ -56,9 +57,10 @@ export const loginUser = async (username, password) => {
     throw new Error(data.mensaje || 'Error al iniciar sesión');
   }
 
-  // Guardamos el token y los datos del usuario en localStorage
-  localStorage.setItem('token', data.token);
-  localStorage.setItem('user', JSON.stringify(data.user));
+  // Guardamos el token y los datos del usuario en sessionStorage
+  sessionStorage.setItem('token', data.token);
+  sessionStorage.setItem('user', JSON.stringify(data.user));
+
 
   return data;
 };
@@ -77,8 +79,11 @@ export const getAllUsers = async () => {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.mensaje || 'Error al obtener usuarios');
+    const err = new Error(data.mensaje || 'Error al obtener usuarios');
+    err.status = response.status;
+    throw err;
   }
+
 
   return data;
 };

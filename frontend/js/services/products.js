@@ -10,7 +10,7 @@ import { API_URL } from '../config.js';
 
 
 // Función helper para obtener el token
-const getToken = () => localStorage.getItem('token');
+const getToken = () => sessionStorage.getItem('token');
 
 /**
  * createProduct - Crea un nuevo producto
@@ -30,8 +30,11 @@ export const createProduct = async (productData) => {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.mensaje || 'Error al crear producto');
+    const err = new Error(data.mensaje || 'Error en la petición de productos');
+    err.status = response.status;
+    throw err;
   }
+
 
   return data;
 };

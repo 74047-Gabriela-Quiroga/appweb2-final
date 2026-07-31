@@ -41,18 +41,18 @@ const authMiddleware = (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Agregamos los datos del usuario decodificado a la petición
-    // Así las rutas pueden saber quién está haciendo la petición
     req.user = decoded;
 
     // next() pasa al siguiente middleware o a la ruta
     next();
   } catch (error) {
-    // Si el token es inválido o expiró, jwt.verify() lanza un error
-    return res.status(403).json({
+    // Si el token es inválido o expiró, devolvemos 401 (No autorizado)
+    return res.status(401).json({
       mensaje: 'Token inválido o expirado',
       detalle: 'Inicie sesión nuevamente para obtener un nuevo token'
     });
   }
 };
+
 
 module.exports = authMiddleware;

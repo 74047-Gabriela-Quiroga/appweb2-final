@@ -162,9 +162,9 @@ async function handleRegister(event) {
  * handleLogout - Cierra la sesión del usuario
  */
 function handleLogout() {
-  // Eliminamos el token y los datos del usuario de localStorage
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
+  // Eliminamos el token y los datos del usuario de sessionStorage
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('user');
 
   // Mostramos la sección de login y ocultamos la app
   authSection.classList.remove('hidden');
@@ -174,12 +174,36 @@ function handleLogout() {
   showToast('Sesión cerrada', 'info');
 }
 
+
+/**
+ * handleApiError - Verifica si un error fue por autenticación (401/403 o token rechazado).
+ * Si es así, cierra la sesión y redirige al login automáticamente.
+ * @param {Error} error - Error capturado
+ * @returns {Boolean} true si fue un error de autenticación manejado
+ */
+function handleApiError(error) {
+  if (
+    error.status === 401 ||
+    error.status === 403 ||
+    error.message.includes('Token') ||
+    error.message.includes('token') ||
+    error.message.includes('Acceso denegado') ||
+    error.message.includes('Inicie sesión')
+  ) {
+    handleLogout();
+    showToast('Sesión expirada o no autorizada. Redirigiendo al login...', 'error');
+    return true;
+  }
+  return false;
+}
+
+
 /**
  * showApp - Muestra la aplicación principal (después del login)
  */
 function showApp() {
-  // Obtenemos los datos del usuario guardados en localStorage
-  const user = JSON.parse(localStorage.getItem('user'));
+  // Obtenemos los datos del usuario guardados en sessionStorage
+  const user = JSON.parse(sessionStorage.getItem('user'));
 
   // Actualizamos el navbar con los datos del usuario
   document.getElementById('user-display-name').textContent = user.name;
@@ -193,6 +217,7 @@ function showApp() {
   // Cargamos la sección inicial (usuarios)
   navigateTo('users');
 }
+
 
 // ============================================================
 // NAVEGACIÓN ENTRE SECCIONES
@@ -243,12 +268,9 @@ async function navigateTo(section) {
         break;
     }
   } catch (error) {
-    // Si el token expiró, cerramos sesión
-    if (error.message.includes('Token') || error.message.includes('token') || error.message.includes('Acceso')) {
-      handleLogout();
-      showToast('Sesión expirada. Inicie sesión nuevamente.', 'error');
-      return;
-    }
+    // Si el error fue por autenticación (token rechazado/expirado), redirigimos al login
+    if (handleApiError(error)) return;
+
     mainContent.innerHTML = `
       <div class="text-center py-20">
         <p class="text-red-500 text-lg font-medium">Error al cargar datos</p>
@@ -259,6 +281,7 @@ async function navigateTo(section) {
       </div>
     `;
   }
+
 }
 
 // ============================================================
@@ -276,6 +299,7 @@ async function openEditUserModal(id) {
     const user = await getUserById(id);
     openModal(renderUserFormModal(user));
   } catch (error) {
+    if (handleApiError(error)) return;
     showToast(error.message, 'error');
   }
 }
@@ -318,6 +342,7 @@ async function handleSaveUser(event, id) {
     closeModal();
     navigateTo('users'); // Recargamos la lista
   } catch (error) {
+    if (handleApiError(error)) return;
     errorDiv.textContent = error.message;
     errorDiv.classList.remove('hidden');
   }
@@ -336,9 +361,11 @@ async function handleDeleteUser(id) {
     showToast('Usuario eliminado correctamente', 'success');
     navigateTo('users'); // Recargamos la lista
   } catch (error) {
+    if (handleApiError(error)) return;
     showToast(error.message, 'error');
   }
 }
+
 
 // ============================================================
 // CRUD DE PRODUCTOS
@@ -353,6 +380,7 @@ async function openEditProductModal(id) {
     const product = await getProductById(id);
     openModal(renderProductFormModal(product));
   } catch (error) {
+    if (handleApiError(error)) return;
     showToast(error.message, 'error');
   }
 }
@@ -381,6 +409,7 @@ async function handleSaveProduct(event, id) {
     closeModal();
     navigateTo('products');
   } catch (error) {
+    if (handleApiError(error)) return;
     errorDiv.textContent = error.message;
     errorDiv.classList.remove('hidden');
   }
@@ -394,6 +423,7 @@ async function handleDeleteProduct(id) {
     showToast('Producto eliminado correctamente', 'success');
     navigateTo('products');
   } catch (error) {
+    if (handleApiError(error)) return;
     showToast(error.message, 'error');
   }
 }
@@ -409,6 +439,7 @@ async function openCreateSaleModal() {
     const [users, products] = await Promise.all([getAllUsers(), getAllProducts()]);
     openModal(renderSaleFormModal(users, products, null));
   } catch (error) {
+    if (handleApiError(error)) return;
     showToast(error.message, 'error');
   }
 }
@@ -422,6 +453,7 @@ async function openEditSaleModal(id) {
     ]);
     openModal(renderSaleFormModal(users, products, sale));
   } catch (error) {
+    if (handleApiError(error)) return;
     showToast(error.message, 'error');
   }
 }
@@ -449,6 +481,7 @@ async function handleSaveSale(event, id) {
     closeModal();
     navigateTo('sales');
   } catch (error) {
+    if (handleApiError(error)) return;
     errorDiv.textContent = error.message;
     errorDiv.classList.remove('hidden');
   }
@@ -462,9 +495,11 @@ async function handleDeleteSale(id) {
     showToast('Venta eliminada correctamente', 'success');
     navigateTo('sales');
   } catch (error) {
+    if (handleApiError(error)) return;
     showToast(error.message, 'error');
   }
 }
+
 
 /**
  * handleProductSelectChange - Calcula el total al cambiar el producto seleccionado
@@ -502,15 +537,16 @@ function calculateTotal() {
  * Si no, mostramos el formulario de login.
  */
 document.addEventListener('DOMContentLoaded', () => {
-  const token = localStorage.getItem('token');
-  const user = localStorage.getItem('user');
+  const token = sessionStorage.getItem('token');
+  const user = sessionStorage.getItem('user');
 
   if (token && user) {
-    // Si hay sesión activa, mostramos la app
+    // Si hay sesión activa en la pestaña, mostramos la app
     showApp();
   }
-  // Si no hay token, se muestra el auth-section por defecto (ya visible en el HTML)
+  // Si no hay token, se muestra el auth-section por defecto
 });
+
 
 // ============================================================
 // EXPONEMOS FUNCIONES AL SCOPE GLOBAL

@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Sistema de gestión de productos y ventas - Aplicaciones Web 2 - IES Siglo 21">
-  <title>Sistema de Gestión | AppWeb2 Final</title>
+  <meta name="description" content="Sistema de ventas - Aplicaciones Web 2 - IES Siglo 21">
+  <title>Sistema de Ventas | AppWeb2 Final</title>
 
   <!-- TailwindCSS v3 via CDN (Play CDN - sin build step) -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -12,7 +13,8 @@
   <!-- Google Font: Inter para tipografía moderna -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
 
   <!-- Configuración personalizada de Tailwind -->
   <script>
@@ -23,8 +25,8 @@
             sans: ['Inter', 'system-ui', 'sans-serif'],
           },
           colors: {
-            primary: { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#818cf8',500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#3730a3',900:'#312e81' },
-            surface: { 50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617' },
+            primary: { 50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc', 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 800: '#3730a3', 900: '#312e81' },
+            surface: { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 700: '#334155', 800: '#1e293b', 900: '#0f172a', 950: '#020617' },
           }
         }
       }
@@ -42,8 +44,15 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* Efecto hover suave en filas de tabla */
@@ -65,29 +74,55 @@
     }
 
     @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
     }
 
     @keyframes fadeOut {
-      from { opacity: 1; }
-      to { opacity: 0; }
+      from {
+        opacity: 1;
+      }
+
+      to {
+        opacity: 0;
+      }
     }
 
     /* Scrollbar personalizada */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #f1f5f9; }
-    ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #64748b;
+    }
 
     /* Botón con efecto de ripple al hacer click */
     .btn-primary {
       transition: all 0.2s ease;
     }
+
     .btn-primary:hover {
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
     }
+
     .btn-primary:active {
       transform: translateY(0);
     }
@@ -96,9 +131,17 @@
     .badge-pulse {
       animation: pulse 2s infinite;
     }
+
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.7;
+      }
     }
 
     /* Loading spinner */
@@ -110,8 +153,11 @@
       height: 24px;
       animation: spin 0.8s linear infinite;
     }
+
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
   </style>
 </head>
@@ -131,11 +177,12 @@
       <div class="flex justify-between items-center h-16">
         <!-- Logo y título -->
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-md">
-            <span class="text-white font-bold text-sm">S21</span>
+          <div
+            class="w-9 h-9 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-md">
+            <span class="text-white font-bold text-sm">AW2</span>
           </div>
           <h1 class="text-lg font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
-            Sistema de Gestión
+            Sistema de Ventas
           </h1>
         </div>
 
@@ -158,7 +205,8 @@
         <!-- Info usuario y logout -->
         <div class="flex items-center gap-3">
           <div class="flex items-center gap-2 px-3 py-1.5 bg-surface-100 rounded-full">
-            <div class="w-7 h-7 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center">
+            <div
+              class="w-7 h-7 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center">
               <span id="user-avatar" class="text-white text-xs font-bold">U</span>
             </div>
             <span id="user-display-name" class="text-sm font-medium text-surface-700">Usuario</span>
@@ -181,11 +229,12 @@
       <div class="glass-card rounded-2xl shadow-xl p-8">
         <!-- Header con logo -->
         <div class="text-center mb-8">
-          <div class="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <span class="text-white font-bold text-2xl">S21</span>
+          <div
+            class="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <span class="text-white font-bold text-2xl">AW2</span>
           </div>
-          <h2 class="text-2xl font-bold text-surface-900">Sistema de Gestión</h2>
-          <p class="text-surface-500 text-sm mt-1">Aplicaciones Web 2 — IES Siglo 21</p>
+          <h2 class="text-2xl font-bold text-surface-900">Sistema de Ventas</h2>
+          <p class="text-surface-500 text-sm mt-1">Aplicaciones Web 2</p>
         </div>
 
         <!-- Tabs Login / Registro -->
@@ -216,6 +265,8 @@
             class="btn-primary w-full py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl shadow-md hover:from-primary-600 hover:to-primary-700 transition-all duration-200">
             Iniciar Sesión
           </button>
+          <p class="text-surface-500 text-sm mt-1">Si desea iniciar sesion con un usuario de prueba utilizar: Usuario:
+            prueba - Contraseña: 123</p>
         </form>
 
         <!-- Formulario Registro -->
@@ -242,12 +293,13 @@
         </form>
 
         <!-- Mensaje de error -->
-        <div id="auth-error" class="hidden mt-4 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl text-center"></div>
+        <div id="auth-error"
+          class="hidden mt-4 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl text-center"></div>
       </div>
 
       <!-- Créditos -->
       <p class="text-center text-surface-400 text-xs mt-6">
-        Examen Final — Aplicaciones Web 2 — IES Siglo 21
+        Final Aplicaciones Web 2 — IES Siglo 21
       </p>
     </div>
   </section>
@@ -266,7 +318,8 @@
     <!-- Fondo oscuro -->
     <div class="absolute inset-0 bg-surface-900/50 backdrop-blur-sm" onclick="closeModal()"></div>
     <!-- Contenido del modal -->
-    <div id="modal-content" class="relative glass-card rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 section-view">
+    <div id="modal-content"
+      class="relative glass-card rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 section-view">
       <!-- Se llena dinámicamente -->
     </div>
   </div>
@@ -277,4 +330,5 @@
   <script type="module" src="./js/index.js"></script>
 
 </body>
+
 </html>

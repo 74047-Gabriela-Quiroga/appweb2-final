@@ -28,11 +28,13 @@ const app = express();
 
 // ==================== MIDDLEWARES GLOBALES ====================
 
-// cors() permite que el frontend (en otro dominio) haga peticiones al backend
+// cors() permite que el frontend en Netlify (o localhost) se comunique con el backend en Render
+// Using origin: true dynamically reflects the requesting domain to prevent CORS/trailing-slash mismatches
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5500',
+  origin: true,
   credentials: true
 }));
+
 
 // express.json() permite leer el body de las peticiones en formato JSON
 app.use(express.json());
